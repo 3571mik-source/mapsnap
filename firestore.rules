@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - can only read/write own user doc
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+
+      // Collections subcollection
+      match /collections/{collectionId} {
+        allow create, read, update, delete: if request.auth.uid == userId;
+
+        // Photos subcollection
+        match /photos/{photoId} {
+          allow create, read, update, delete: if request.auth.uid == userId;
+        }
+      }
+
+      // Places subcollection
+      match /places/{placeId} {
+        allow create, read, update, delete: if request.auth.uid == userId;
+      }
+
+      // Follows subcollection
+      match /follows/{followId} {
+        allow create, read, update, delete: if request.auth.uid == userId;
+      }
+    }
+
+    // Public profiles can be read by anyone
+    match /publicProfiles/{username} {
+      allow read: if true;
+      allow write: if request.auth.uid == resource.data.userId;
+    }
+  }
+}
